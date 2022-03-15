@@ -1,0 +1,9 @@
+flask_jsonpify
+pyOpenSSL
+librosa
+paddlepaddle
+pre-commit==2.16.0
+identify==2.4.0
+yacs
+paddlespeech==0.1.0
+paddlenlp

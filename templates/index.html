@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>ASR</title>
+    </head>
+    <body>
+        <h3>
+            操作
+        </h3>
+
+        <input type="button" value="开始ASR" id="startASR" />
+
+        <input type="button" value="停止ASR" id="stopASR" />
+        <!--
+        <input type="button" value="开始说话" id="startRecord" />
+
+        <input type="button" value="说完，上传录音流" id="uploadRecordStream" />
+        -->
+        <h3>
+            转写文本：
+        </h3>
+        <div>
+            <textarea id="voice_text" style="width:80%"></textarea>
+
+        </div>
+
+        <canvas id="canvas" style="width:81%"></canvas>
+        
+    <script type="text/javascript" src="{{ url_for('static', filename = 'recorder/recorder.js') }}"></script>
+    
+    <script type="text/javascript" src="{{ url_for('static', filename = 'recorder/index.js') }}"></script></body>
+</html>
+
+

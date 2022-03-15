@@ -1,0 +1,6 @@
+.DS_Store
+*.pyc
+.vscode
+*log
+models
+backup

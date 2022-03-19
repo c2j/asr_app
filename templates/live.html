@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<script type="text/javascript" src="/static/socket.io.js"></script>
+</head>
+
+<body>
+	<form action="/uploader" method="POST" enctype="multipart/form-data">
+		<input type="file" name="wavfile" id="wavfile"/>
+		<input type="hidden" name="client_id" id="client_id" value="" />
+		<input type="button" value="上传" onclick="clos_con();ws(upload_wavfile);"/>
+	</form>
+
+	<!--div><button onclick="ws()">连接服务端</button></div>
+	<div><button onclick="clos_con()">断开连接</button></div>
+	<div><button onclick="send_msg()">发送消息给服务端</button></div-->
+	
+		<h3>
+            转写文本：
+        </h3>
+        <div>
+            <textarea id="asr_text" style="width:80%"></textarea>
+
+        </div>
+
+	<script type="text/javascript">
+		windw_socket = null;
+		var client_id = null;
+
+
+		function ws(callback) {
+			namespace = '/asr_channel';
+			var websocket_url = location.protocol + '//' + document.domain + ':' + location.port + namespace;
+			console.info(websocket_url);
+			var socket = io.connect(websocket_url);
+			// socket.emit('connect2', {'param':'value'});	//发送消息
+			// socket.close()
+			socket.on('connect', function (data) {
+				client_id = "";
+				if(typeof data === "undefined"){
+					console.info("连接成功1");
+				    client_id = ""
+				}else{
+					console.info("连接成功0");
+					client_id = data.sid
+					document.getElementById("client_id").value = data.sid;
+					callback();
+				}
+				console.log('connecte:' + client_id + ",socket: " + socket.id);
+				//alert("建立连接成功")
+				windw_socket = socket
+				console.log("socket id: " + windw_socket.id);
+				console.log("socket client_id: " + client_id);
+			});
+			socket.on('disconnect', function (data) {
+				//alert("连接已断开")
+				console.log('disconnecte:' + data);
+			});
+
+			socket.on('asr_message', function (data) {
+				console.log('asr_message:' + data.text);
+				document.getElementById('asr_text').value += data.text;
+				//alert("收到服务端的回复:" + data)
+			});
+		}
+		function clos_con() {
+			if (windw_socket != null) {
+				windw_socket.close()
+			}
+		}
+		window.onbeforeunload = function (event) {
+			if (windw_socket != null && !windw_socket.closed) {
+				// confirm(windw_socket.closed)
+				windw_socket.close()
+			}
+		}
+		window.onunload = function (event) {
+			if (windw_socket != null && !windw_socket.closed) {
+				//confirm(windw_socket.closed)
+				windw_socket.close()
+			}
+		}
+		function send_msg() {
+			if (windw_socket != null) {
+				windw_socket.emit('message', "这里是客户端");
+			}
+		}
+
+		function upload_wavfile(){
+			var file = document.getElementById('wavfile').files[0];
+			var ajax = new XMLHttpRequest;
+
+			var formData = new FormData;
+			formData.append('wavfile', file);
+			formData.append('client_id', client_id);
+
+			ajax.upload.addEventListener("progress", myProgressHandler, false);
+			ajax.addEventListener('load', myOnLoadHandler, false);
+			ajax.open('POST', '/uploader', true);
+			ajax.send(formData);
+		}
+		function myProgressHandler(event) {
+			//your code to track upload progress
+			var p = Math.floor(event.loaded/event.total*100);
+			document.title = p+'%';
+		}
+
+		function myOnLoadHandler(event) {
+			// your code on finished upload
+			console.log(event.target.responseText);
+		}
+	</script>
+</body>
+
+</html>

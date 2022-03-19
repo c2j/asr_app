@@ -1,4 +1,9 @@
+#index-url=https://mirrors.aliyun.com/pypi/simple/
+#apt-get update && apt-get install gcc g++
+#apt-get install libsndfile1 libflac8 libogg0 libvorbis0a libvorbisenc2
+pyworld==0.2.10
 flask_jsonpify
+flask_socketio==4.3.2
 pyOpenSSL
 librosa
 paddlepaddle
@@ -7,3 +12,7 @@ identify==2.4.0
 yacs
 paddlespeech==0.1.0
 paddlenlp
+paddlespeech_ctcdecoders
+
+#pip install --index-url=https://mirrors.aliyun.com/pypi/simple/ torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
+torchaudio

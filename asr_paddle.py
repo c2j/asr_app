@@ -1060,7 +1060,7 @@ class VADExecutor():
     def __init__(self):
         self.model = init_jit_model(model_path=f'./files/silero_vad.jit')
 
-    def seperate_segments(self, wav, sample_rate):
+    def seperate_segments(self, wav_file, sample_rate):
         wav = read_audio(path=wav_file, sampling_rate=sample_rate)
         # get speech timestamps from full audio file
         window_size_samples=768 if sample_rate==8000 else 1536

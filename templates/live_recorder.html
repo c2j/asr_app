@@ -8,9 +8,9 @@
 </head>
 
 <body>
-	<input type="button" value="开始ASR" id="startASR" onclick="ws(startASR);" />
+	<input type="button" value="开始ASR" id="startASR" onclick="ws(startASR);document.getElementById('stopASR').disabled=false;document.getElementById('startASR').disabled=true;" />
 
-	<input type="button" value="停止ASR" id="stopASR" onclick="stopASR()" />
+	<input type="button" value="停止ASR" id="stopASR" onclick="stopASR();document.getElementById('stopASR').disabled=true;document.getElementById('startASR').disabled=false;" disabled/>
 
 
 

@@ -147,7 +147,7 @@ app.after_request(after_request)
 if __name__ == '__main__':
     #PPSPEECH_HOME=`PWD` python ws_asr.py
     # 预热ASR引擎
-    txt = get_asr_text("jijiji.wav")
-    print(txt)
+    #txt = get_asr_text("jijiji.wav")
+    #print(txt)
     socketio.run(app, host='0.0.0.0', debug=True, port=5443, ssl_context=('secure/server.crt', 'secure/server.key'))
     # app.run()

@@ -1068,7 +1068,7 @@ class VADExecutor():
                                                 self.model, 
                                                 sampling_rate=sample_rate, 
                                                 min_speech_duration_ms=1000, 
-                                                min_silence_duration_ms=750, 
+                                                min_silence_duration_ms=500, 
                                                 window_size_samples=window_size_samples)
         return wav, speech_timestamps                                             
 
@@ -1079,7 +1079,7 @@ def gen_wav(wav_file, sample_rate=8000):
     # Temporary files are stored here
     temp_dir = "./tmp" #tempfile.gettempdir()
     for st in range(len(speech_timestamps)):
-        tmp = os.path.join(temp_dir, "%s.wav"%(st))
+        tmp = os.path.join(temp_dir, "%s-%s.wav"%(wav_file, st))
     
         torchaudio.save(tmp,
                         collect_chunks([speech_timestamps[st]], wav).unsqueeze(0), 
@@ -1088,7 +1088,7 @@ def gen_wav(wav_file, sample_rate=8000):
                         bits_per_sample=16) 
         # 返回音频、以秒为单位的声音开始时间
         ts = speech_timestamps[st]['start']/sample_rate
-        yield tmp, str(timedelta(seconds=ts))
+        yield tmp, ts #str(timedelta(seconds=ts))
 
 def get_wav_and_timestamps(wav_file, sample_rate=8000):
     vad_executor = VADExecutor()

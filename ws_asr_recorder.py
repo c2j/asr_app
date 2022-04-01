@@ -1,5 +1,5 @@
 import json
-from flask import Flask, render_template, request, redirect, sessions
+from flask import Flask, render_template, request, redirect, sessions, send_file
 from flask_socketio import SocketIO, emit #导入socketio包
 from werkzeug.utils import secure_filename
 import os
@@ -44,10 +44,14 @@ def asrThreadFunction(client_id, wav_file, start_time=None):
             st_datetime = datetime.fromtimestamp(start_time/1000)
             #print(st_datetime)
             new_datetime = str( st_datetime + timedelta(seconds=ts) )
+            # 当前用的是标准时区，需格式化为本地时区（+8）
+
             #print("start_time: ", start_time, 'ts: ', ts)
         else:
             new_datetime = str(timedelta(seconds=ts))
-        res = {"text": "%s: %s\r\n" % (new_datetime, asrt) }
+        #将wav文件回传，以支持回放
+        res = {"text": "%s: %s\r\n" % (new_datetime, asrt) ,
+               "wav_file": "%s" % (t) }
         socketio.emit("asr_message", res, broadcast=False, namespace=name_space, room=client_id)
     if segments_count > 1:
         latest_wavfile_with_client_id[client_id] = latest_wavfile
@@ -55,7 +59,14 @@ def asrThreadFunction(client_id, wav_file, start_time=None):
     #socketio.emit("disconnect", {}, broadcast=False, namespace=name_space, room=client_id)
 
         
-        
+@app.route('/playwav', methods=['GET'])
+def playwav():
+    wav_file = request.args['wav_file'] 
+    return send_file(
+         wav_file, 
+         mimetype="audio/wav", 
+         as_attachment=True, 
+         attachment_filename="test.wav")      
 
 @app.route('/uploader',methods=['GET','POST'])
 def uploader():
@@ -103,7 +114,7 @@ def on_message(message):
         ts = datetime.now()
         startTime = message['startTime'] # 以毫秒为单位的时间戳
         print("Begin:",ts, "Time:", startTime)
-        wavfile =  'tmp/%s-%s.wav' % (client_id, ts)            
+        wavfile =  'tmp/%s-%s.wav' % (client_id, ts.timestamp())            
         with wave.open(wavfile, 'wb') as af:              
             af.setnchannels(2)
             af.setparams((1, 2, 16000, 0, 'NONE', 'Uncompressed'))

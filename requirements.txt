@@ -1,6 +1,10 @@
+#docker run -it -v /Users/c2j/Projects/ASR/asr_app:/workspace/asr_app -p 5443:5443 pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime /bin/bash
+#docker pull pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
 #index-url=https://mirrors.aliyun.com/pypi/simple/
 #apt-get update && apt-get install gcc g++
 #apt-get install libsndfile1 libflac8 libogg0 libvorbis0a libvorbisenc2
+#pip install --index-url=https://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
+
 pyworld==0.2.10
 flask_jsonpify
 flask_socketio==4.3.2
@@ -15,4 +19,6 @@ paddlenlp
 paddlespeech_ctcdecoders
 
 #pip install --index-url=https://mirrors.aliyun.com/pypi/simple/ torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
-torchaudio
+#torchaudio
+
+#PPSPEECH_HOME=`pwd` /opt/conda/bin/python ws_asr_recorder.py

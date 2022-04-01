@@ -1,40 +1,117 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="zh-CN">
 
 <head>
-	<meta charset="UTF-8">
-	<title>Title</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+	<title>速记助手</title>
+
+	<!-- Bootstrap -->
+	<link rel="stylesheet" href="/static/bootstrap-3.4.1/css/bootstrap.min.css"
+		integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+	<style>
+		.bcontent {
+			margin-top: 10px;
+		}
+
+		a:link {
+			text-decoration: none;
+		}
+
+		a:hover {
+			text-decoration: none;
+			cursor: hand;
+		}
+	</style>
 	<script type="text/javascript" src="/static/socket.io.js"></script>
 </head>
 
 <body>
-	<input type="button" value="开始ASR" id="startASR" onclick="ws(startASR);document.getElementById('stopASR').disabled=false;document.getElementById('startASR').disabled=true;" />
+	<div class="container bcontent">
+		<!-- Nav tabs -->
+		<ul class="nav nav-tabs" role="tablist">
+			<li role="presentation" class="active"><a href="#upload_file_tab" aria-controls="upload_file_tab" role="tab"
+					data-toggle="tab">上传文件</a></li>
+			<li role="presentation"><a href="#record_stream_tab" aria-controls="record_stream_tab" role="tab"
+					data-toggle="tab">现场录音</a></li>
+		</ul>
+		<!-- Tab panes -->
+		<div class="tab-content">
+			<div role="tabpanel" class="tab-pane active" id="upload_file_tab">
+				<div class="row">
+					<form>
+						<div class="form-group">
+							<label class="form-label" for="customFile">选择并上传录音文件</label>
+							<input type="file" class="form-control" name="wavfile" id="wavfile" />
+							<br />
+							<button id="uploadButton" class="btn"
+								onclick="clos_con();ws(upload_wavfile);document.getElementById('stopASR').disabled=true;document.getElementById('startASR').disabled=true;return false;">
+								<span class="glyphicon glyphicon-upload" aria-hidden="true"></span> 上传并识别
+							</button>
+							<input type="hidden" name="client_id" id="client_id" value="" />
+						</div>
+					</form>
+				</div>
+			</div>
+			<div role="tabpanel" class="tab-pane" id="record_stream_tab">
+				<div class="row">
+					<label class="form-label" for="customFile">点击开始按钮，开启实时录音并上传识别</label>
+					<br />
+					<button id="startASR"
+						onclick="ws(startASR);document.getElementById('stopASR').disabled=false;document.getElementById('startASR').disabled=true;document.getElementById('uploadButton').disabled=true">
+						<span class="glyphicon glyphicon-record" aria-hidden="true"></span>开始录音并识别
+					</button>
+					<button value="停止ASR" id="stopASR"
+						onclick="stopASR();document.getElementById('stopASR').disabled=true;document.getElementById('startASR').disabled=false;document.getElementById('uploadButton').disabled=false"
+						disabled>
+						<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>停止录音
+					</button>
 
-	<input type="button" value="停止ASR" id="stopASR" onclick="stopASR();document.getElementById('stopASR').disabled=true;document.getElementById('startASR').disabled=false;" disabled/>
+				</div>
+				<div class="row">
+					<canvas id="canvas" style="width:81%;height:42px;"></canvas>
+				</div>
+			</div>
+
+		</div>
 
 
+		<h3>
+			转写文本：
+		</h3>
 
-	<h3>
-		转写文本：
-	</h3>
-	<div>
-		<textarea id="asr_text" style="width:80%"></textarea>
+		<div class="row">
+			<div class="input-group">
+				<textarea  class="form-control" value="" placeholder="转写文本" id="asr_text" rows="1"></textarea>
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button" id="copy-button" data-toggle="tooltip"
+						data-placement="button" title="将文本复制到剪贴板">
+						复制
+					</button>
+				</span>
+			</div>
 
+			<div class=".pre-scrollable" id="result_box">
+
+			</div>
+
+		</div>
+
+		
 	</div>
-
-	<canvas id="canvas" style="width:81%"></canvas>
-
 	<script type="text/javascript" src="{{ url_for('static', filename = 'recorder/recorder.js') }}"></script>
 
 	<script type="text/javascript">
-		windw_socket = null;
+		var windw_socket = null;
 		var client_id = null;
 
 
 		function ws(callback) {
 			namespace = '/asr_channel';
 			var websocket_url = location.protocol + '//' + document.domain + ':' + location.port + namespace;
-			console.info(websocket_url);
+			console.log(websocket_url);
 			var socket = io.connect(websocket_url);
 			// socket.emit('connect2', {'param':'value'});	//发送消息
 			// socket.close()
@@ -42,17 +119,17 @@
 				windw_socket = socket;
 				client_id = "";
 				if (typeof data === "undefined") {
-					console.info("连接成功1");
+					console.log("连接成功1");
 					client_id = ""
 				} else {
-					console.info("连接成功0");
+					console.log("连接成功0");
 					client_id = data.sid
 					//document.getElementById("client_id").value = data.sid;
 					callback();
 				}
 				console.log('connecte:' + client_id + ",socket: " + socket.id);
 				//alert("建立连接成功")
-				
+
 				console.log("socket id: " + windw_socket.id);
 				console.log("socket client_id: " + client_id);
 			});
@@ -63,10 +140,16 @@
 
 			socket.on('asr_message', function (data) {
 				console.log('asr_message:' + data.text);
+				// 输出转写识别的结果，并加上录音回放的按钮
+				var result_box = document.getElementById("result_box");
+				result_box.innerHTML = result_box.innerHTML + "<p>" + data.text + "<a class=\"glyphicon glyphicon-play\" href=\"#\" onclick=\"const mu=new Audio('/playwav?wav_file=" + data.wav_file + "');mu.play();return false;\"></a> </p>";
+				//<audio controls='play pause'><source src='/playwav?wav_file="+data.wav_file+"'></audio>
 				document.getElementById('asr_text').value += data.text;
 				//alert("收到服务端的回复:" + data)
 			});
+
 		}
+
 		function clos_con() {
 			if (windw_socket != null) {
 				windw_socket.close()
@@ -114,6 +197,7 @@
 			console.log(event.target.responseText);
 		}
 
+
 		var recorderOne = null, oCanvas = document.getElementById("canvas"), // 显示波形的canvas
 			ctx = oCanvas.getContext("2d"), drawRecordId = null;
 
@@ -154,10 +238,10 @@
 			isOne = true;
 			recorder = recorderOne;
 			startTime = startTimeOne;
-			asrTimer = setInterval(function () {				
+			asrTimer = setInterval(function () {
 				loopASR();
 			}, 15000);
-			recorder.start().then(function () {				
+			recorder.start().then(function () {
 				console.log('开始录音1');
 			});
 			// 开始绘制canvas
@@ -167,13 +251,13 @@
 		}
 
 		function loopASR() {
-			
+
 			if (recorder && (recorderOne || recorderTwo)) {
 				var dataArr = []
 				if (isOne) {
 					recorder = recorderTwo;
 					startTimeTwo = Date.now();
-					recorder.start().then(function () { 						
+					recorder.start().then(function () {
 						console.log('开始录音2');
 					});
 					recorderOne.stop();
@@ -182,9 +266,9 @@
 				} else {
 					recorder = recorderOne;
 					startTimeOne = Date.now();
-					recorder.start().then(function () {						
+					recorder.start().then(function () {
 						console.log('开始录音1');
-					 });
+					});
 					recorderTwo.stop();
 					dataArr = recorderTwo.getPCMBlob();
 					startTime = startTimeTwo;
@@ -192,7 +276,7 @@
 				isOne = !isOne;
 
 				console.log('发送数据');
-				windw_socket.emit('upload_audio_stream', {data: dataArr, startTime: startTime});
+				windw_socket.emit('upload_audio_stream', { data: dataArr, startTime: startTime });
 			}
 
 		}
@@ -246,7 +330,53 @@
 		}
 	</script>
 
+	<!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+	<script src="/static/jquery.min.js"
+		integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ"
+		crossorigin="anonymous"></script>
 
+	<!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+	<script src="/static/bootstrap-3.4.1/js/bootstrap.min.js"
+		integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+		crossorigin="anonymous"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function () {
+			// Initialize the tooltip.
+			$('#copy-button').tooltip();
+
+			// When the copy button is clicked, select the value of the text box, attempt
+			// to execute the copy command, and trigger event to update tooltip message
+			// to indicate whether the text was successfully copied.
+			$('#copy-button').bind('click', function () {
+				var input = document.querySelector('#asr_text');
+				//$('#asr_text').show();
+				input.focus();
+				input.select();   //setSelectionRange(0, input.value.length);
+				console.log("COPY: " + input.value);
+				try {
+					var success = document.execCommand('copy');
+					if (success) {
+						$('#copy-button').trigger('copied', ['已复制!']);
+					} else {
+						$('#copy-button').trigger('copied', ['复制 Ctrl-c']);
+					}
+				} catch (err) {
+					$('#copy-button').trigger('copied', ['复制 Ctrl-c']);
+				}
+				//$('#asr_text').hide();
+			});
+
+			// Handler for updating the tooltip message.
+			$('#copy-button').bind('copied', function (event, message) {
+				$(this).attr('title', message)
+					.tooltip('fixTitle')
+					.tooltip('show')
+					.attr('title', "复制到剪贴板")
+					.tooltip('fixTitle');
+			});
+		});
+	</script>
 </body>
 
 </html>
